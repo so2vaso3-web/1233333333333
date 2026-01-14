@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { UserData } from './Auth';
+import UserManagement from './UserManagement';
 
 interface DashboardProps {
   onLogout: () => void;
@@ -69,73 +70,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
   const [withdrawData, setWithdrawData] = useState({ 
     method: 'bank', bankName: VN_BANKS[0], account: '', fullName: '', amount: '' 
   });
-  
-  const logsEndRef = useRef<HTMLDivElement>(null);
-
-  const formatVNDClean = (amount: number) => Math.floor(amount).toLocaleString('vi-VN');
-  const formatVNDLive = (amount: number) => amount.toLocaleString('vi-VN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-
-  const updateHistoryDelta = (delta: number) => {
-    if (delta <= 0) return;
-    const todayStr = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-    setHistory(prev => {
-      const newHistory = [...prev];
-      const todayIdx = newHistory.findIndex(h => h.date === todayStr);
-      if (todayIdx !== -1) {
-        newHistory[todayIdx].amount += delta;
-      } else {
-        newHistory.shift();
-        newHistory.push({ date: todayStr, amount: delta });
-      }
-      localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(newHistory));
-      return newHistory;
-    });
-  };
-
-  useEffect(() => {
-    if (isMining) {
-      const lastUpdate = localStorage.getItem(STORAGE_KEY_LAST_UPDATE);
-      if (lastUpdate) {
-        const now = Date.now();
-        const diffMs = now - parseInt(lastUpdate);
-        const hoursPassed = Math.min(24, diffMs / (1000 * 60 * 60));
-        const earnedWhileOffline = hoursPassed * earningRate;
-        if (earnedWhileOffline > 0.01) {
-          setBalance(prev => {
-            const newBal = prev + earnedWhileOffline;
-            localStorage.setItem(STORAGE_KEY_BALANCE, newBal.toString());
-            return newBal;
-          });
-          updateHistoryDelta(earnedWhileOffline);
-          addLog(`Đồng bộ: +${formatVNDClean(earnedWhileOffline)}đ offline.`, 'success');
-        }
-      }
-    }
-    localStorage.setItem(STORAGE_KEY_LAST_UPDATE, Date.now().toString());
-  }, []);
-
-  useEffect(() => {
-    let timeout: any;
-    const processPacket = () => {
-      if (!isMining) return;
-      const nextTick = Math.random() * 3000 + 2000; 
-      timeout = setTimeout(() => {
-        const shareOfHour = nextTick / (1000 * 60 * 60);
-        const amountToAdd = earningRate * shareOfHour * (Math.random() * 0.4 + 0.8);
-        setBalance(prev => {
-          const newBal = prev + amountToAdd;
-          localStorage.setItem(STORAGE_KEY_BALANCE, newBal.toString());
-          localStorage.setItem(STORAGE_KEY_LAST_UPDATE, Date.now().toString());
-          return newBal;
-        });
-        updateHistoryDelta(amountToAdd);
-        setIsJumping(true);
-        setTimeout(() => setIsJumping(false), 300);
-        addLog(`Packet processed: +${amountToAdd.toFixed(2)}đ`, 'info');
-        processPacket();
-      }, nextTick);
-    };
-    if (isMining) processPacket();
+  const [showUserManagement, setShowUserManagement] = useState(false);
     localStorage.setItem(STORAGE_KEY_STATUS, isMining.toString());
     return () => clearTimeout(timeout);
   }, [isMining, earningRate]);
@@ -191,13 +126,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
              Rút tiền
           </button>
           {user.username === 'admin' && (
-            <button
-              onClick={onOpenAdmin}
-              className="w-full p-4 rounded-2xl font-black flex items-center gap-3 transition-all bg-indigo-500/20 border border-indigo-500/30 text-indigo-100 hover:bg-indigo-500/30"
-            >
-              <span className="text-lg">⚙️</span>
-              <span>Quản lý APK (Admin)</span>
-            </button>
+            <>
+              <button
+                onClick={onOpenAdmin}
+                className="w-full p-4 rounded-2xl font-black flex items-center gap-3 transition-all bg-indigo-500/20 border border-indigo-500/30 text-indigo-100 hover:bg-indigo-500/30"
+              >
+                <span className="text-lg">⚙️</span>
+                <span>Quản lý APK (Admin)</span>
+              </button>
+              <button
+                onClick={() => setShowUserManagement(true)}
+                className="w-full p-4 rounded-2xl font-black flex items-center gap-3 transition-all bg-purple-500/20 border border-purple-500/30 text-purple-100 hover:bg-purple-500/30"
+              >
+                <span className="text-lg">👥</span>
+                <span>Quản lý người dùng</span>
+              </button>
+            </>
           )}
         </nav>
         <button
@@ -327,6 +271,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
       `}</style>
+      
+      {showUserManagement && <UserManagement onClose={() => setShowUserManagement(false)} />}
     </div>
   );
 };
