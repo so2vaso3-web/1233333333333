@@ -31,8 +31,7 @@ const App: React.FC = () => {
   const isAdmin = currentUser?.username === 'admin';
   
   const [apkInfo, setApkInfo] = useState<ApkInfo>({
-    url: '/app.apk',
-    version: '2.5.0',
+    url: 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663294396811/PkdQgbtkAamqXrfq.apk',
     size: '18.2 MB',
     updatedAt: 'Vừa cập nhật',
     earningRate: 2000 
