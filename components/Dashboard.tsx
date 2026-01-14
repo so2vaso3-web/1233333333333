@@ -125,7 +125,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
       setIsJumping(true);
       setTimeout(() => setIsJumping(false), 150);
 
-      addLog(`Ä‘ang xá»­ lÃ½ node - +${formatVNDClean(earningRate / 3600)}Ä‘`, 'success');
+      addLog(`Đang xử lý node - +${formatVNDClean(earningRate / 3600)}đ`, 'success');
     };
 
     if (isMining) {
