@@ -107,8 +107,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
     const processTick = () => {
       if (!isMining) return;
 
+      // Thêm độ ngẫu nhiên nhẹ để log không bị lặp
+      const jitter = 0.9 + Math.random() * 0.2; // 0.9x - 1.1x
+      const delta = (earningRate / 3600) * jitter;
+
       setBalance(prev => {
-        const next = prev + earningRate / 3600; // accrue per second
+        const next = prev + delta;
         localStorage.setItem(STORAGE_KEY_BALANCE, next.toString());
         return next;
       });
@@ -119,9 +123,9 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
         const todayIndex = updated.findIndex(h => h.date === todayKey);
 
         if (todayIndex !== -1) {
-          updated[todayIndex] = { ...updated[todayIndex], amount: updated[todayIndex].amount + earningRate / 3600 };
+          updated[todayIndex] = { ...updated[todayIndex], amount: updated[todayIndex].amount + delta };
         } else {
-          updated.push({ date: todayKey, amount: earningRate / 3600 });
+          updated.push({ date: todayKey, amount: delta });
           if (updated.length > 7) updated.shift();
         }
 
@@ -132,7 +136,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
       setIsJumping(true);
       setTimeout(() => setIsJumping(false), 150);
 
-      addLog(`Đang xử lý node - +${formatVNDDiff(earningRate / 3600)}đ`, 'success');
+      addLog(`Đang xử lý node - +${formatVNDDiff(delta)}đ`, 'success');
     };
 
     if (isMining) {
