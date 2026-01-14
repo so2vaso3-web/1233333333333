@@ -323,6 +323,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
         <button onClick={() => setIsWithdrawOpen(false)} className={`flex flex-col items-center gap-1 ${!isWithdrawOpen ? 'text-indigo-500' : 'text-slate-500'}`}><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" /></svg><span className="text-[8px] font-black uppercase">Home</span></button>
         <button onClick={() => { setIsWithdrawOpen(true); setWithdrawStep('form'); }} className={`flex flex-col items-center gap-1 ${isWithdrawOpen ? 'text-indigo-500' : 'text-slate-500'}`}><svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14V9h2v7h-2zm0-9h2v2h-2V7z" /></svg><span className="text-[8px] font-black uppercase">Rút tiền</span></button>
         <button onClick={onHome} className="flex flex-col items-center gap-1 text-slate-500"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M17 16l4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4" /></svg><span className="text-[8px] font-black uppercase">Trang chủ</span></button>
+        {user.username === 'admin' && (
+          <button onClick={() => setShowUserManagement(true)} className="flex flex-col items-center gap-1 text-purple-300">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 00-3-3.87" /><path d="M16 3.13a4 4 0 010 7.75" /></svg>
+            <span className="text-[8px] font-black uppercase">QL User</span>
+          </button>
+        )}
       </nav>
 
       <style>{`
