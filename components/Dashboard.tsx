@@ -74,7 +74,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
   const logsEndRef = useRef<HTMLDivElement>(null);
 
   const formatVNDClean = (value: number) => {
-    return Math.floor(value).toLocaleString('vi-VN');
+    // làm tròn thay vì làm tròn xuống để tránh hiển thị +0đ khi giá trị nhỏ
+    return Math.round(value).toLocaleString('vi-VN');
   };
 
   const formatVNDLive = (value: number) => {
@@ -125,7 +126,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
       setIsJumping(true);
       setTimeout(() => setIsJumping(false), 150);
 
-      addLog(`Đang xử lý node - +${formatVNDClean(earningRate / 3600)}đ`, 'success');
+      addLog(`Đang xử lý node - +${formatVNDLive(earningRate / 3600)}đ`, 'success');
     };
 
     if (isMining) {
