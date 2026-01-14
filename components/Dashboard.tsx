@@ -67,11 +67,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
   const [isWithdrawOpen, setIsWithdrawOpen] = useState(false);
   const [withdrawStep, setWithdrawStep] = useState<'form' | 'processing' | 'success'>('form');
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
-  const [withdrawData, setWithdrawData] = useState({ 
-    method: 'bank', bankName: VN_BANKS[0], account: '', fullName: '', amount: '' 
+  const [withdrawData, setWithdrawData] = useState({
+    method: 'bank', bankName: VN_BANKS[0], account: '', fullName: '', amount: ''
   });
   const [showUserManagement, setShowUserManagement] = useState(false);
-    localStorage.setItem(STORAGE_KEY_STATUS, isMining.toString());
+
+  const logsEndRef = useRef<HTMLDivElement>(null);
     return () => clearTimeout(timeout);
   }, [isMining, earningRate]);
 
