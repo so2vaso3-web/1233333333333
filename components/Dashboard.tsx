@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { UserData } from './Auth';
 import UserManagement from './UserManagement';
 
@@ -33,7 +33,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
   const STORAGE_KEY_BALANCE = `zenith_balance_${USER_KEY}`;
   const STORAGE_KEY_STATUS = `zenith_status_${USER_KEY}`;
   const STORAGE_KEY_HISTORY = `zenith_history_${USER_KEY}`;
-  const STORAGE_KEY_LAST_UPDATE = `zenith_last_upd_${USER_KEY}`;
 
   const [balance, setBalance] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY_BALANCE);
@@ -73,17 +72,75 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
   const [showUserManagement, setShowUserManagement] = useState(false);
 
   const logsEndRef = useRef<HTMLDivElement>(null);
-    return () => clearTimeout(timeout);
-  }, [isMining, earningRate]);
 
-  const addLog = (msg: string, type: 'info' | 'success' | 'warning' = 'info') => {
+  const formatVNDClean = (value: number) => {
+    return Math.floor(value).toLocaleString('vi-VN');
+  };
+
+  const formatVNDLive = (value: number) => {
+    return value.toLocaleString('vi-VN', { maximumFractionDigits: 0 });
+  };
+
+  const addLog = useCallback((msg: string, type: 'info' | 'success' | 'warning' = 'info') => {
     const newLog: LogEntry = {
       id: Math.random().toString(36).substr(2, 9),
       time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
       msg, type
     };
     setLogs(prev => [newLog, ...prev].slice(0, 30));
-  };
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY_STATUS, isMining ? 'true' : 'false');
+  }, [isMining]);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    const processTick = () => {
+      if (!isMining) return;
+
+      setBalance(prev => {
+        const next = prev + earningRate / 3600; // accrue per second
+        localStorage.setItem(STORAGE_KEY_BALANCE, next.toString());
+        return next;
+      });
+
+      setHistory(prev => {
+        const todayKey = new Date().toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+        const updated = [...prev];
+        const todayIndex = updated.findIndex(h => h.date === todayKey);
+
+        if (todayIndex !== -1) {
+          updated[todayIndex] = { ...updated[todayIndex], amount: updated[todayIndex].amount + earningRate / 3600 };
+        } else {
+          updated.push({ date: todayKey, amount: earningRate / 3600 });
+          if (updated.length > 7) updated.shift();
+        }
+
+        localStorage.setItem(STORAGE_KEY_HISTORY, JSON.stringify(updated));
+        return updated;
+      });
+
+      setIsJumping(true);
+      setTimeout(() => setIsJumping(false), 150);
+
+      addLog(`Ä‘ang xá»­ lÃ½ node - +${formatVNDClean(earningRate / 3600)}Ä‘`, 'success');
+    };
+
+    if (isMining) {
+      processTick();
+      timer = setInterval(processTick, 1000);
+    }
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [isMining, earningRate, addLog]);
+
+  useEffect(() => {
+    logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [logs]);
 
   const handleWithdraw = (e: React.FormEvent) => {
     e.preventDefault();
