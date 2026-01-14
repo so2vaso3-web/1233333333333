@@ -78,6 +78,12 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
     return Math.round(value).toLocaleString('vi-VN');
   };
 
+  const formatVNDDiff = (value: number) => {
+    const abs = Math.abs(value);
+    const formatted = abs < 1 ? abs.toFixed(2) : Math.round(abs).toLocaleString('vi-VN');
+    return value < 0 ? `-${formatted}` : formatted;
+  };
+
   const formatVNDLive = (value: number) => {
     return value.toLocaleString('vi-VN', { maximumFractionDigits: 0 });
   };
@@ -126,7 +132,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onLogout, onHome, onOpenAdmin, ea
       setIsJumping(true);
       setTimeout(() => setIsJumping(false), 150);
 
-      addLog(`Đang xử lý node - +${formatVNDLive(earningRate / 3600)}đ`, 'success');
+      addLog(`Đang xử lý node - +${formatVNDDiff(earningRate / 3600)}đ`, 'success');
     };
 
     if (isMining) {
